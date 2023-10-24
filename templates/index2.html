@@ -1,0 +1,148 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+
+  <title>Waste Segregation</title>
+  <style>
+    body,
+    html {
+      height: 100%;
+      margin: 0;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      flex-direction: column;
+      background-color: rgb(198, 251, 221);
+    }
+
+    .box-container {
+      position: relative;
+    }
+
+    .box {
+      width: 1000px;
+      height: 600px;
+      border: 5px solid #00bcb5;
+      background-color: white;
+      border-radius: 5%;
+    }
+
+    .scan-button {
+      background-color: #00bcb5;
+      color: rgb(255, 255, 255);
+      border: none;
+      border-radius: 50%;
+      padding: 15px 20px;
+      cursor: pointer;
+      font-size: 24px;
+      position: absolute;
+      bottom: 20px;
+      left: 50%;
+      transform: translateX(-50%);
+    }
+
+    .app-name {
+      font-size: 32px;
+      margin-bottom: 20px;
+      color: #00bcb5;
+    }
+
+    .result {
+      font-size: 24px;
+      margin-top: 20px;
+    }
+
+    canvas {
+      display: none;
+    }
+  </style>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/4.0.1/socket.io.js"></script>
+</head>
+
+<body>
+
+  <div class="app-name"><b>Green-O - Waste Segregation</b></div>
+  <div class="box-container">
+    <video id="camera-feed" width="1000" height="600" autoplay style="display: none;"></video>
+    <canvas id="processed-feed" width="1000" height="600"></canvas>
+    <button class="scan-button" id="scan-button"><i class="fas fa-camera"></i> Start Scan</button>
+  </div>
+  <div class="result" id="result-area"></div>
+
+  <script>
+    const scanButton = document.getElementById("scan-button");
+    const resultArea = document.getElementById("result-area");
+    const processedFeed = document.getElementById("processed-feed");
+    const ctx = processedFeed.getContext("2d");
+    const cameraFeed = document.getElementById("camera-feed");
+
+    let isProcessing = false;
+    let isCameraOn = false;
+
+    const socket = io.connect('http://' + document.domain + ':' + location.port);
+
+    socket.on('connect', () => {
+      console.log('Connected to the server');
+    });
+
+    scanButton.addEventListener("click", () => {
+      if (!isProcessing) {
+        isProcessing = true;
+
+        // Start the camera
+        if (!isCameraOn) {
+          isCameraOn = true;
+          navigator.mediaDevices.getUserMedia({ video: true })
+            .then((stream) => {
+              cameraFeed.srcObject = stream;
+              cameraFeed.onloadedmetadata = () => {
+                cameraFeed.style.display = "block";
+              };
+            })
+            .catch((error) => {
+              console.error("Error accessing camera:", error);
+            });
+        }
+
+        // Use Socket.IO for frame processing and result display
+        socket.emit('start_processing'); // Tell the server to start processing
+        socket.on('frame', (frame_base64) => {
+          const frame = new Image();
+          frame.src = "data:image/jpeg;base64," + frame_base64;
+          frame.onload = () => {
+            ctx.drawImage(frame, 0, 0, processedFeed.width, processedFeed.height);
+          };
+        });
+
+        // Update the button text and functionality
+        scanButton.textContent = "Stop Scan";
+        scanButton.style.backgroundColor = "#ff0000"; // Change to red
+      } else {
+        isProcessing = false;
+
+        // Stop the camera
+        if (isCameraOn) {
+          isCameraOn = false;
+          const tracks = cameraFeed.srcObject.getTracks();
+          tracks.forEach((track) => {
+            track.stop();
+          });
+          cameraFeed.style.display = "none";
+        }
+
+        // Use Socket.IO to stop frame processing
+        socket.emit('stop_processing'); // Tell the server to stop processing
+
+        // Update the button text and functionality
+        scanButton.textContent = "Start Scan";
+        scanButton.style.backgroundColor = "#00bcb5"; // Change back to the original color
+      }
+    });
+  </script>
+</body>
+
+</html>

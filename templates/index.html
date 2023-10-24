@@ -1,0 +1,119 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+
+  <title>Waste Segregation</title>
+  <style>
+    body,
+    html {
+      height: 100%;
+      margin: 0;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      flex-direction: column;
+      background-color: rgb(198, 251, 221);
+    }
+
+    .box-container {
+      position: relative;
+    }
+
+    .box {
+      width: 1000px;
+      height: 600px;
+      border: 5px solid #00bcb5;
+      background-color: white;
+      border-radius: 5%;
+    }
+
+    .scan-button {
+      background-color: #00bcb5;
+      color: rgb(255, 255, 255);
+      border: none;
+      border-radius: 50%;
+      /* Adjusted border-radius to make it round */
+      padding: 15px 20px;
+      cursor: pointer;
+      font-size: 24px;
+      /* Increased font size */
+      position: absolute;
+      bottom: 20px;
+      left: 50%;
+      transform: translateX(-50%);
+    }
+
+    .app-name {
+      font-size: 32px;
+      /* Increased font size */
+      margin-bottom: 20px;
+      /* Increased margin for more space */
+      color: #00bcb5;
+    }
+
+    /* Add a result display area */
+    .result {
+      font-size: 24px;
+      margin-top: 20px;
+    }
+
+    canvas {
+      display: none;
+    }
+  </style>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/4.0.1/socket.io.js"></script>
+</head>
+
+<body>
+
+  <div class="app-name"><b>Green-O - Waste Segregation</b></div>
+  <div class="box-container">
+    <!-- Add a video element to display the camera feed -->
+    <video id="camera-feed" width="1000" height="600" autoplay style="display: none;"></video>
+    <!-- Add a canvas element to display the processed feed -->
+    <canvas id="processed-feed" width="1000" height="600"></canvas>
+    <button class="scan-button" id="scan-button"><i class="fas fa-camera"></i> Scan Waste</button>
+  </div>
+  <!-- Display the classification result here -->
+  <div class="result" id="result-area"></div>
+
+  <!-- Add a script to handle the camera feed and result display -->
+  
+  <script>
+    const scanButton = document.getElementById("scan-button");
+    const resultArea = document.getElementById("result-area");
+    const processedFeed = document.getElementById("processed-feed");
+    const ctx = processedFeed.getContext("2d");
+
+    let isProcessing = false;
+
+    // Create a Socket.IO connection
+    const socket = io.connect('http://' + document.domain + ':' + location.port);
+
+    socket.on('connect', () => {
+      console.log('Connected to the server');
+      if (!isProcessing) {
+        isProcessing = true;
+
+        // Create an event to receive processed frames
+        socket.on('frame', (frame_base64) => {
+          const frame = new Image();
+          frame.src = "data:image/jpeg;base64," + frame_base64;
+          frame.onload = () => {
+            ctx.drawImage(frame, 0, 0, processedFeed.width, processedFeed.height);
+          };
+        });
+
+        // Send a message to start processing
+        
+      }
+    });
+  </script>
+
+</body>
+
+</html>
