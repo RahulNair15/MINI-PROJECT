@@ -24,8 +24,8 @@
     }
 
     .box {
-      width: 1000px;
-      height: 600px;
+      width: 1000;
+      height: 600;
       border: 5px solid #00bcb5;
       background-color: white;
       border-radius: 5%;
@@ -36,9 +36,11 @@
       color: rgb(255, 255, 255);
       border: none;
       border-radius: 50%;
+      /* Adjusted border-radius to make it round */
       padding: 15px 20px;
       cursor: pointer;
       font-size: 24px;
+      /* Increased font size */
       position: absolute;
       bottom: 20px;
       left: 50%;
@@ -47,10 +49,13 @@
 
     .app-name {
       font-size: 32px;
+      /* Increased font size */
       margin-bottom: 20px;
+      /* Increased margin for more space */
       color: #00bcb5;
     }
 
+    /* Add a result display area */
     .result {
       font-size: 24px;
       margin-top: 20px;
@@ -65,13 +70,18 @@
 
 <body>
 
-  <div class="app-name"><b>Green-O - Waste Segregation</b></div>
+  <div class="app-name"><b>Recyclean - Waste Segregation</b></div>
   <div class="box-container">
-    <video id="camera-feed" width="1000" height="600" autoplay style="display: none;"></video>
+    <!-- Add a video element to display the camera feed -->
+    <video id="camera-feed" width="1000" height="600" autoplay style="display: block;"></video>
+    <!-- Add a canvas element to display the processed feed -->
     <canvas id="processed-feed" width="1000" height="600"></canvas>
-    <button class="scan-button" id="scan-button"><i class="fas fa-camera"></i> Start Scan</button>
+    <button class="scan-button" id="scan-button"><i class="fas fa-camera"></i> Scan Waste</button>
   </div>
+  <!-- Display the classification result here -->
   <div class="result" id="result-area"></div>
+
+  <!-- Add a script to handle the camera feed and result display -->
 
   <script>
     const scanButton = document.getElementById("scan-button");
@@ -83,66 +93,51 @@
     let isProcessing = false;
     let isCameraOn = false;
 
-    const socket = io.connect('http://' + document.domain + ':' + location.port);
+    // Create a Socket.IO connection
+    const socket = io.connect('http://127.0.0.1:5000');
 
     socket.on('connect', () => {
       console.log('Connected to the server');
     });
-
     scanButton.addEventListener("click", () => {
+
       if (!isProcessing) {
         isProcessing = true;
+        socket.emit('start_processing');
 
-        // Start the camera
-        if (!isCameraOn) {
-          isCameraOn = true;
-          navigator.mediaDevices.getUserMedia({ video: true })
-            .then((stream) => {
-              cameraFeed.srcObject = stream;
-              cameraFeed.onloadedmetadata = () => {
-                cameraFeed.style.display = "block";
-              };
-            })
-            .catch((error) => {
-              console.error("Error accessing camera:", error);
-            });
-        }
-
-        // Use Socket.IO for frame processing and result display
-        socket.emit('start_processing'); // Tell the server to start processing
         socket.on('frame', (frame_base64) => {
           const frame = new Image();
           frame.src = "data:image/jpeg;base64," + frame_base64;
-          frame.onload = () => {
+          
             ctx.drawImage(frame, 0, 0, processedFeed.width, processedFeed.height);
-          };
+          
+          processedFeed.style.display = "block";
+
         });
 
-        // Update the button text and functionality
+
+
         scanButton.textContent = "Stop Scan";
-        scanButton.style.backgroundColor = "#ff0000"; // Change to red
+        scanButton.style.backgroundColor = "#ff0000";
+        // Create an event to receive processed frames
+
+        // Send a message to start processing when the button is clicked
+
+
       } else {
         isProcessing = false;
 
-        // Stop the camera
-        if (isCameraOn) {
-          isCameraOn = false;
-          const tracks = cameraFeed.srcObject.getTracks();
-          tracks.forEach((track) => {
-            track.stop();
-          });
-          cameraFeed.style.display = "none";
-        }
-
-        // Use Socket.IO to stop frame processing
-        socket.emit('stop_processing'); // Tell the server to stop processing
+        // Stop receiving processed frames from the backend
+        socket.emit('stop_processing');
 
         // Update the button text and functionality
         scanButton.textContent = "Start Scan";
         scanButton.style.backgroundColor = "#00bcb5"; // Change back to the original color
       }
     });
+
   </script>
+
 </body>
 
 </html>

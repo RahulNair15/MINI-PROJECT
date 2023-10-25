@@ -36,11 +36,9 @@
       color: rgb(255, 255, 255);
       border: none;
       border-radius: 50%;
-      /* Adjusted border-radius to make it round */
       padding: 15px 20px;
       cursor: pointer;
       font-size: 24px;
-      /* Increased font size */
       position: absolute;
       bottom: 20px;
       left: 50%;
@@ -49,13 +47,10 @@
 
     .app-name {
       font-size: 32px;
-      /* Increased font size */
       margin-bottom: 20px;
-      /* Increased margin for more space */
       color: #00bcb5;
     }
 
-    /* Add a result display area */
     .result {
       font-size: 24px;
       margin-top: 20px;
@@ -72,34 +67,49 @@
 
   <div class="app-name"><b>Green-O - Waste Segregation</b></div>
   <div class="box-container">
-    <!-- Add a video element to display the camera feed -->
     <video id="camera-feed" width="1000" height="600" autoplay style="display: none;"></video>
-    <!-- Add a canvas element to display the processed feed -->
     <canvas id="processed-feed" width="1000" height="600"></canvas>
-    <button class="scan-button" id="scan-button"><i class="fas fa-camera"></i> Scan Waste</button>
+    <button class="scan-button" id="scan-button"><i class="fas fa-camera"></i> Start Scan</button>
   </div>
-  <!-- Display the classification result here -->
   <div class="result" id="result-area"></div>
 
-  <!-- Add a script to handle the camera feed and result display -->
-  
   <script>
     const scanButton = document.getElementById("scan-button");
     const resultArea = document.getElementById("result-area");
     const processedFeed = document.getElementById("processed-feed");
     const ctx = processedFeed.getContext("2d");
+    const cameraFeed = document.getElementById("camera-feed");
 
     let isProcessing = false;
+    let isCameraOn = false;
 
-    // Create a Socket.IO connection
     const socket = io.connect('http://' + document.domain + ':' + location.port);
 
     socket.on('connect', () => {
       console.log('Connected to the server');
+    });
+
+    scanButton.addEventListener("click", () => {
       if (!isProcessing) {
         isProcessing = true;
 
-        // Create an event to receive processed frames
+        // Start the camera
+        if (!isCameraOn) {
+          isCameraOn = true;
+          navigator.mediaDevices.getUserMedia({ video: true })
+            .then((stream) => {
+              cameraFeed.srcObject = stream;
+              cameraFeed.onloadedmetadata = () => {
+                cameraFeed.style.display = "block";
+              };
+            })
+            .catch((error) => {
+              console.error("Error accessing camera:", error);
+            });
+        }
+
+        // Use Socket.IO for frame processing and result display
+        socket.emit('start_processing'); // Tell the server to start processing
         socket.on('frame', (frame_base64) => {
           const frame = new Image();
           frame.src = "data:image/jpeg;base64," + frame_base64;
@@ -108,12 +118,30 @@
           };
         });
 
-        // Send a message to start processing
-        
+        // Update the button text and functionality
+        // Change to red
+      } else {
+        isProcessing = false;
+
+        // Stop the camera
+        if (isCameraOn) {
+          isCameraOn = false;
+          const tracks = cameraFeed.srcObject.getTracks();
+          tracks.forEach((track) => {
+            track.stop();
+          });
+          cameraFeed.style.display = "none";
+        }
+
+        // Use Socket.IO to stop frame processing
+        socket.emit('stop_processing'); // Tell the server to stop processing
+
+        // Update the button text and functionality
+        scanButton.textContent = "Start Scan";
+        scanButton.style.backgroundColor = "#00bcb5"; // Change back to the original color
       }
     });
   </script>
-
 </body>
 
 </html>

@@ -14,7 +14,7 @@ socketio = SocketIO(app)
 
 box_annotator = None
 is_processing = False  # A flag to track if processing is active
-cap = cv2.VideoCapture(0)
+
 @app.route('/')
 def index():
     return render_template('index.html')
@@ -29,7 +29,7 @@ def handle_connect():
     )
 
     def send_processed_frame():
-        
+        cap = cv2.VideoCapture(0)
         cap.set(cv2.CAP_PROP_FRAME_WIDTH, 1280)
         cap.set(cv2.CAP_PROP_FRAME_HEIGHT, 720)
 
@@ -59,7 +59,7 @@ def handle_connect():
                 _, encoded_frame = cv2.imencode('.jpg', frame)
                 frame_bytes = encoded_frame.tobytes()
                 frame_base64 = base64.b64encode(frame_bytes).decode()
-                socketio.emit('frame', frame_base64, broadcast=True)
+                socketio.emit('frame', frame_base64)
 
             end_time = time.perf_counter()
             fps = 1 / (end_time - start_time)
