@@ -4,7 +4,6 @@ import cv2
 from ultralytics import YOLO
 import supervision as sv
 import base64
-import io
 import eventlet
 import numpy as np
 import time
