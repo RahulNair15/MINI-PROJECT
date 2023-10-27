@@ -21,7 +21,7 @@ def index():
 @socketio.on('connect')
 def handle_connect():
     print("Connected")
-    model = YOLO(r"C:\Users\a21ma\OneDrive\Desktop\IITR Sociothon\IITR_Sociothon\models\WasteSegregationSmall.pt")  
+    model = YOLO(r"C:\Users\a21ma\OneDrive\Desktop\Code\Projects\IITR Sociothon\IITR_Sociothon\models\WasteSegregationSmall.pt")  
     box_annotator = sv.BoxAnnotator(
         thickness=2,
         text_thickness=2,

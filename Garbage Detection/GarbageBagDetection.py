@@ -10,7 +10,7 @@ def main():
     cap.set(cv2.CAP_PROP_FRAME_WIDTH, 1280) 
     cap.set(cv2.CAP_PROP_FRAME_HEIGHT, 720)
     
-    model = YOLO(r"C:\Users\a21ma\OneDrive\Desktop\IITR Sociothon\IITR_Sociothon\models\GarbageBag.pt")
+    model = YOLO(r"C:\Users\a21ma\OneDrive\Desktop\Code\Projects\IITR Sociothon\IITR_Sociothon\models\GarbageBag.pt")
     
     box_annotator = sv.BoxAnnotator(
         thickness = 2,

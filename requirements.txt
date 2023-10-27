@@ -3,7 +3,6 @@ opencv-python
 flask_socketio
 ultralytics
 supervision==0.3.0
-base64
 eventlet
 
 streamlit>=1.26.0
@@ -15,3 +14,4 @@ duckduckgo-search
 anthropic>=0.3.0
 trubrics>=1.4.3
 streamlit-feedback
+python-dotenv
