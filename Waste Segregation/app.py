@@ -51,20 +51,17 @@ async def read_camera(websocket: WebSocket):
         
         frame = box_annotator.annotate(scene=frame, detections=filtered_detections, labels=labels)
         
+        end_time = time.perf_counter()
+        fps = 1 / (end_time - start_time)
+        print(f"FPS: {fps:.2f}")
+        # cv2.putText(frame, f"FPS: {fps:.2f}",(20,70), cv2.FONT_HERSHEY_SIMPLEX, 1, (0,255,0), 2)
+        
         # Convert the frame to base64
         _, buffer = cv2.imencode('.jpg', frame)
         jpg_as_text = base64.b64encode(buffer).decode('utf-8')
 
         # Send the frame to the WebSocket
         await websocket.send_text(jpg_as_text)
-        
-        end_time = time.perf_counter()
-        fps = 1 / (end_time - start_time)
-        print(f"FPS: {fps:.2f}")
-        cv2.putText(frame, f"FPS: {fps:.2f}",(20,70), cv2.FONT_HERSHEY_SIMPLEX, 1, (0,255,0), 2)
-            
-        # Introduce a delay (simulating real-time)
-        await asyncio.sleep(0.1)
 
 
 @app.websocket("/ws")
