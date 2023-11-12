@@ -1,9 +1,8 @@
-flask
+fastapi
+jinja2
 opencv-python
-flask_socketio
 ultralytics
 supervision==0.3.0
-eventlet
 
 streamlit>=1.26.0
 folium
