@@ -8,7 +8,7 @@ with st.sidebar:
     from dotenv import load_dotenv
 
     load_dotenv()  # This is to load the .env file
-    openai_api_key = os.getenv("OPEN_API_KEY")  # This is to get the API key from the .env file
+    openai_api_key = os.getenv("OPENAI_API_KEY")  # This is to get the API key from the .env file
     
 
     # "[Get an OpenAI API key](https://platform.openai.com/account/api-keys)"
