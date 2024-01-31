@@ -1,0 +1,78 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Waste Segregation</title>
+  <style>
+    body,
+    html {
+      height: 100%;
+      margin: 0;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      flex-direction: column;
+      background-color: rgb(198, 251, 221);
+    }
+
+    .box-container {
+      position: relative;
+    }
+
+    #scanButton {
+      background-color: #00bcb5;
+      color: rgb(255, 255, 255);
+      border: none;
+      border-radius: 50%;
+      /* Adjusted border-radius to make it round */
+      padding: 15px 20px;
+      cursor: pointer;
+      font-size: 24px;
+      /* Increased font size */
+      position: absolute;
+      bottom: 20px;
+      left: 50%;
+      transform: translateX(-50%);
+    }
+
+    .app-name {
+      font-size: 32px;
+      /* Increased font size */
+      margin-bottom: 20px;
+      /* Increased margin for more space */
+      color: #00bcb5;
+    }
+  </style>
+</head>
+
+<body>
+  <div class="app-name"><b>Recyclean - Waste Segregation</b></div>
+  <div class="box-container">
+    <img id="video" width="640" height="480" />
+    <button id="scanButton" onclick="toggleScan()">Scan</button>
+  </div>
+  <script>
+    var socket = new WebSocket("ws://" + window.location.host + "/ws");
+    var img = document.getElementById('video');
+    var scanButton = document.getElementById('scanButton');
+    var isScanning = false;
+
+    socket.onmessage = function (event) {
+      if (isScanning) {
+        img.src = "data:image/jpeg;base64," + event.data;
+      }
+    };
+    function toggleScan() {
+      isScanning = !isScanning;
+      if (isScanning) {
+        scanButton.textContent = "Stop Scan";
+      } else {
+        scanButton.textContent = "Scan";
+      }
+    }
+  </script>
+</body>
+
+</html>
