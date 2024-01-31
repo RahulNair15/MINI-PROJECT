@@ -8,7 +8,7 @@ with st.sidebar:
     from dotenv import load_dotenv
 
     load_dotenv()  # This is to load the .env file
-    openai_api_key = "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"  # This is to get the API key from the .env file
+    openai_api_key = os.getenv("OPEN_API_KEY") # This is to get the API key from the .env file
 
 st.title("🔎LangChain-Chat with search")
 
