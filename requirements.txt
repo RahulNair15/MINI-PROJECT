@@ -4,7 +4,7 @@ opencv-python
 ultralytics
 supervision==0.3.0
 
-streamlit>=1.26.0
+streamlit
 folium
 streamlit_folium
 langchain>=0.0.217
