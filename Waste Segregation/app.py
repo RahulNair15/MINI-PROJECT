@@ -13,7 +13,7 @@ app = FastAPI()
 
 templates = Jinja2Templates(directory="templates")
 
-model = YOLO(r'C:\Users\a21ma\OneDrive\Desktop\Code\Projects\IITR Sociothon\IITR_Sociothon\models\WasteSegregationSmall.pt')
+model = YOLO(r'C:\Users\jhas0\OneDrive\Desktop\rahul\IITR_Sociothon\models\WasteSegregationSmall.pt')
 box_annotator = None
 
 cap = cv2.VideoCapture(0)
