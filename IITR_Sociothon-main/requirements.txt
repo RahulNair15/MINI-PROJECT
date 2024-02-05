@@ -1,0 +1,16 @@
+fastapi
+jinja2
+opencv-python
+ultralytics
+supervision==0.3.0
+
+streamlit>=1.26.0
+folium
+streamlit_folium
+langchain>=0.0.217
+openai
+duckduckgo-search
+anthropic>=0.3.0
+trubrics>=1.4.3
+streamlit-feedback
+python-dotenv
